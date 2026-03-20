@@ -18,8 +18,10 @@ export const Hero = () => {
         </h1>
 
         <p className="text-muted-foreground text-lg">
-          Build secure authentication with login, signup, OTP, and role-based
-          access. Designed for modern scalable applications.
+          A production-ready authentication system featuring secure user
+          registration, login, email verification, password reset, JWT-based
+          authentication with refresh tokens, two-factor authentication (2FA),
+          and role-based access control for scalable applications.
         </p>
 
         <div className="flex gap-4">
