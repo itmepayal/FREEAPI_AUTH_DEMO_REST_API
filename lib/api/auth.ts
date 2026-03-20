@@ -41,7 +41,7 @@ export const changePassword = (data: {
   });
 
 export const forgotPassword = (data: { email: string }) => {
-  return apiClient("/forgot-password", {
+  return apiClient("/api/v1/accounts/forgot-password", {
     method: "POST",
     body: JSON.stringify(data),
   });
