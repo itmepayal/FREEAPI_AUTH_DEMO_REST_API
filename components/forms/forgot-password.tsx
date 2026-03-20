@@ -3,11 +3,18 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
 
 import { useForgotPassword } from "@/hooks/use-auth";
+import {
+  forgotPasswordSchema,
+  ForgotPasswordFormValues,
+} from "@/schemas/auth.schema";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,26 +30,26 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-
   const { mutate: forgotPassword, isPending } = useForgotPassword();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
 
-    if (!email) {
-      toast.error("Email is required");
-      return;
-    }
-
+  const onSubmit = (data: ForgotPasswordFormValues) => {
     forgotPassword(
-      { email },
+      { email: data.email },
       {
         onSuccess: () => {
           toast.success("Reset link sent to your email");
@@ -63,7 +70,9 @@ export function ForgotPasswordForm({
             message = err.message;
           }
 
-          toast.error(message);
+          toast.error("Request failed", {
+            description: message,
+          });
         },
       }
     );
@@ -80,23 +89,33 @@ export function ForgotPasswordForm({
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <FieldGroup>
+              {/* Email */}
               <Field>
                 <FieldLabel>Email</FieldLabel>
                 <Input
                   type="email"
                   placeholder="m@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isPending}
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </Field>
 
+              {/* Submit */}
               <Field>
-                <Button type="submit" className="w-full" disabled={isPending}>
+                <Button
+                  type="submit"
+                  className="w-full h-10"
+                  disabled={isPending}
+                >
                   {isPending ? (
-                    <div className="flex items-center gap-2 justify-center">
+                    <div className="flex items-center justify-center gap-2">
                       <Loader2 className="animate-spin w-4 h-4" />
+                      <span>Sending link...</span>
                     </div>
                   ) : (
                     "Send Reset Link"
@@ -105,9 +124,9 @@ export function ForgotPasswordForm({
 
                 <FieldDescription className="text-center">
                   Remember your password?{" "}
-                  <a href="/login" className="underline">
+                  <Link href="/login" className="underline underline-offset-4">
                     Login
-                  </a>
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

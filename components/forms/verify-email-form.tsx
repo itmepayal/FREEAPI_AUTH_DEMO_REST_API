@@ -2,6 +2,12 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+import { useVerifyEmail } from "@/hooks/use-auth";
+
+import { cn } from "@/lib/utils";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,10 +16,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
-import { cn } from "@/lib/utils";
-import { useVerifyEmail } from "@/hooks/use-auth";
+import Link from "next/link";
 
 export function VerifyEmailForm({
   className,
@@ -21,33 +25,45 @@ export function VerifyEmailForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const params = useParams();
-  const token = params.token as string;
+
+  const token = params?.token as string;
+
   const { mutate: verifyEmail, isPending } = useVerifyEmail();
 
-  const handleResend = () => {
-    console.log(token);
+  const handleVerify = () => {
     if (!token) {
-      toast.error("Token is missing!");
+      toast.error("Invalid or missing token");
       return;
     }
+
     verifyEmail(
       { token },
       {
         onSuccess: () => {
-          toast.success("Email verified successfully!");
+          toast.success("Email verified successfully");
+
           setTimeout(() => {
             router.push("/login");
           }, 1500);
         },
         onError: (err: any) => {
-          const message = toast.error("Failed to resend email");
+          let message = "Verification failed";
+
+          if (err?.response?.data) {
+            const firstError = Object.values(err.response.data)[0];
+            if (Array.isArray(firstError)) {
+              message = firstError[0];
+            }
+          } else if (err?.message) {
+            message = err.message;
+          }
+
+          toast.error("Verification failed", {
+            description: message,
+          });
         },
       }
     );
-  };
-
-  const handleContinue = () => {
-    router.push("/login");
   };
 
   return (
@@ -56,42 +72,47 @@ export function VerifyEmailForm({
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Verify Your Email</CardTitle>
           <CardDescription>
-            A verification link has been sent to your email. Please check your
-            inbox.
+            Click below to verify your email and activate your account.
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
             <FieldGroup>
+              {/* Verify Button */}
               <Field>
                 <Button
                   type="button"
-                  className="w-full"
-                  onClick={handleResend}
+                  className="w-full h-10"
+                  onClick={handleVerify}
                   disabled={isPending}
                 >
                   {isPending ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="animate-spin" />
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="animate-spin w-4 h-4" />
                     </div>
                   ) : (
-                    "Send"
+                    "Verify Email"
                   )}
                 </Button>
               </Field>
 
+              {/* Continue */}
               <Field>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full"
-                  onClick={handleContinue}
+                  className="w-full h-10"
+                  onClick={() => router.push("/login")}
                 >
                   Continue to Login
                 </Button>
+
                 <FieldDescription className="text-center">
-                  Already verified? You can login now.
+                  Already verified?{" "}
+                  <Link href="/login" className="underline underline-offset-4">
+                    Login
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
