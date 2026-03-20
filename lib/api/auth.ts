@@ -47,7 +47,7 @@ export const forgotPassword = (data: { email: string }) => {
   });
 };
 
-export const resetPassword = (data: { token: string; password: string }) =>
+export const resetPassword = (data: { token: string; new_password: string }) =>
   apiClient("/api/v1/accounts/reset-password/", {
     method: "POST",
     body: JSON.stringify(data),

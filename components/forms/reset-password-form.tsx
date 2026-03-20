@@ -34,21 +34,38 @@ export function ResetPasswordForm({
   const token = params?.token as string;
 
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const { mutate: resetPassword, isPending } = useResetPassword();
+
+  const validatePassword = () => {
+    if (!password) {
+      toast.error("Password is required");
+      return false;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!password) {
-      toast.error("Password is required");
-      return;
-    }
+    if (!validatePassword()) return;
 
     resetPassword(
       {
         token,
-        password: password,
+        new_password: password,
       },
       {
         onSuccess: () => {
@@ -81,27 +98,47 @@ export function ResetPasswordForm({
       <Card>
         <CardHeader className="text-center">
           <CardTitle>Reset Password</CardTitle>
-          <CardDescription>Enter your new password</CardDescription>
+          <CardDescription>Enter and confirm your new password</CardDescription>
         </CardHeader>
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <FieldGroup>
+              {/* Password */}
               <Field>
                 <FieldLabel>New Password</FieldLabel>
                 <Input
                   type="password"
                   placeholder="Enter new password"
                   value={password}
+                  disabled={isPending}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </Field>
 
+              {/* Confirm Password */}
               <Field>
-                <Button type="submit" className="w-full" disabled={isPending}>
+                <FieldLabel>Confirm Password</FieldLabel>
+                <Input
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  disabled={isPending}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </Field>
+
+              {/* Submit */}
+              <Field>
+                <Button
+                  type="submit"
+                  className="w-full h-10"
+                  disabled={isPending}
+                >
                   {isPending ? (
                     <div className="flex items-center gap-2 justify-center">
                       <Loader2 className="animate-spin w-4 h-4" />
+                      <span>Updating password...</span>
                     </div>
                   ) : (
                     "Reset Password"
