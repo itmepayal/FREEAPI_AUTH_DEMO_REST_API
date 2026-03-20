@@ -1,6 +1,6 @@
 "use client";
 
-import { VerifyEmailForm } from "@/components/auth/verify-email-form";
+import { VerifyEmailForm } from "@/components/forms/verify-email-form";
 import { Shield } from "lucide-react";
 
 export default function VerifyEmailPage() {

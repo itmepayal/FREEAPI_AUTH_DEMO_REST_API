@@ -24,7 +24,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 export function SignupForm({
   className,
@@ -32,6 +33,9 @@ export function SignupForm({
 }: React.ComponentProps<"div">) {
   const router = useRouter();
   const { mutate: register, isPending } = useRegister();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register: formRegister,
@@ -46,7 +50,7 @@ export function SignupForm({
       onSuccess: () => {
         toast.success("Account created successfully");
         setTimeout(() => {
-          router.push("/verify-email");
+          router.push("/login");
         }, 1500);
       },
       onError: (err: any) => {
@@ -83,7 +87,7 @@ export function SignupForm({
         <CardContent>
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
-              {/* Name */}
+              {/* Username */}
               <Field>
                 <FieldLabel>Username</FieldLabel>
                 <Input {...formRegister("username")} />
@@ -104,10 +108,25 @@ export function SignupForm({
               </Field>
 
               {/* Passwords */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-rows-1 md:grid-rows-2 gap-4">
+                {/* Password */}
                 <Field>
                   <FieldLabel>Password</FieldLabel>
-                  <Input type="password" {...formRegister("password")} />
+                  <div className="relative">
+                    <Input
+                      className="pr-10"
+                      type={showPassword ? "text" : "password"}
+                      {...formRegister("password")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="text-red-500 text-sm">
                       {errors.password.message}
@@ -115,9 +134,28 @@ export function SignupForm({
                   )}
                 </Field>
 
+                {/* Confirm Password */}
                 <Field>
                   <FieldLabel>Confirm Password</FieldLabel>
-                  <Input type="password" {...formRegister("confirmPassword")} />
+                  <div className="relative">
+                    <Input
+                      className="pr-10"
+                      type={showConfirmPassword ? "text" : "password"}
+                      {...formRegister("confirmPassword")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                      aria-label="Toggle confirm password visibility"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
+                    </button>
+                  </div>
                   {errors.confirmPassword && (
                     <p className="text-red-500 text-sm">
                       {errors.confirmPassword.message}
@@ -134,8 +172,8 @@ export function SignupForm({
               <Field>
                 <Button type="submit" className="w-full" disabled={isPending}>
                   {isPending ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="animate-spin" />
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="animate-spin w-4 h-4" />
                     </div>
                   ) : (
                     "Sign Up"

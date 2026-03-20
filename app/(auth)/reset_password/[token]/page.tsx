@@ -1,9 +1,9 @@
 "use client";
 
-import { SignupForm } from "@/components/forms/signup-form";
+import { ResetPasswordForm } from "@/components/forms/reset-password-form";
 import { Shield } from "lucide-react";
 
-export default function SignupPage() {
+export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -13,7 +13,7 @@ export default function SignupPage() {
           </div>
           Auth
         </a>
-        <SignupForm />
+        <ResetPasswordForm />
       </div>
     </div>
   );

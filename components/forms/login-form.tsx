@@ -27,9 +27,11 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { Github } from "lucide-react";
+import { Github, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -37,6 +39,8 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -51,10 +55,23 @@ export function LoginForm({
       const res = await loginUser(data);
 
       setUser(res.data);
+
+      toast.success("Login successful");
+
       router.push("/dashboard");
     } catch (err: any) {
-      console.error(err);
-      alert(err?.message || "Login failed");
+      let message = "Login failed";
+
+      if (err?.response?.data) {
+        const firstError = Object.values(err.response.data)[0];
+        if (Array.isArray(firstError)) {
+          message = firstError[0];
+        }
+      } else if (err?.message) {
+        message = err.message;
+      }
+
+      toast.error(message);
     }
   };
 
@@ -113,7 +130,21 @@ export function LoginForm({
                   </Link>
                 </div>
 
-                <Input type="password" {...register("password")} />
+                <div className="relative">
+                  <Input
+                    className="pr-10"
+                    type={showPassword ? "text" : "password"}
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
 
                 {errors.password && (
                   <p className="text-sm text-red-500">
@@ -129,7 +160,13 @@ export function LoginForm({
                   className="w-full"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Loading..." : "Login"}
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="animate-spin w-4 h-4" />
+                    </div>
+                  ) : (
+                    "Login"
+                  )}
                 </Button>
 
                 <FieldDescription className="text-center">

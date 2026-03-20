@@ -40,11 +40,12 @@ export const changePassword = (data: {
     body: JSON.stringify(data),
   });
 
-export const forgotPassword = (email: string) =>
-  apiClient("/api/v1/accounts/forgot-password/", {
+export const forgotPassword = (data: { email: string }) => {
+  return apiClient("/forgot-password", {
     method: "POST",
-    body: JSON.stringify({ email }),
+    body: JSON.stringify(data),
   });
+};
 
 export const resetPassword = (data: { token: string; password: string }) =>
   apiClient("/api/v1/accounts/reset-password/", {

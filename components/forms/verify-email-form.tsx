@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,11 +20,12 @@ export function VerifyEmailForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const params = useParams();
+  const token = params.token as string;
   const { mutate: verifyEmail, isPending } = useVerifyEmail();
 
   const handleResend = () => {
+    console.log(token);
     if (!token) {
       toast.error("Token is missing!");
       return;
@@ -33,7 +34,10 @@ export function VerifyEmailForm({
       { token },
       {
         onSuccess: () => {
-          toast.success("Verification email resent successfully!");
+          toast.success("Email verified successfully!");
+          setTimeout(() => {
+            router.push("/login");
+          }, 1500);
         },
         onError: (err: any) => {
           const message = toast.error("Failed to resend email");

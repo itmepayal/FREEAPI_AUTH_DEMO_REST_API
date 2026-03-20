@@ -3,7 +3,7 @@ import { Poppins, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryProvider } from "@/providers";
-import { AuthInitializer } from "@/components/auth/auth-initializer";
+import { AuthInitializer } from "@/components/forms/auth-initializer";
 
 const poppins = Poppins({
   variable: "--font-sans",
