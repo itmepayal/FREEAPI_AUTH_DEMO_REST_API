@@ -25,11 +25,10 @@ export const refreshToken = () =>
 export const getMe = () => apiClient("/api/v1/accounts/me/");
 
 export const updateAvatar = (formData: FormData) =>
-  fetch(`/api/v1/accounts/me/avatar/`, {
+  apiClient("/api/v1/accounts/me/avatar/", {
     method: "PATCH",
     body: formData,
-    credentials: "include",
-  }).then((res) => res.json());
+  });
 
 export const changePassword = (data: {
   old_password: string;
@@ -67,13 +66,13 @@ export const resendEmail = (email: string) =>
 
 export const setup2FA = () => apiClient("/api/v1/accounts/2fa/setup/");
 
-export const enable2FA = (data: { otp: string }) =>
+export const enable2FA = (data: { token: string }) =>
   apiClient("/api/v1/accounts/2fa/enable/", {
     method: "POST",
     body: JSON.stringify(data),
   });
 
-export const disable2FA = (data: { otp: string }) =>
+export const disable2FA = (data: { token: string }) =>
   apiClient("/api/v1/accounts/2fa/disable/", {
     method: "POST",
     body: JSON.stringify(data),

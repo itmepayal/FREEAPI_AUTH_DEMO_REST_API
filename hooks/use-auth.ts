@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as authApi from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { useEffect } from "react";
@@ -134,7 +134,13 @@ export const useChangeRole = () => {
 };
 
 export const useUpdateAvatar = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: authApi.updateAvatar,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
   });
 };

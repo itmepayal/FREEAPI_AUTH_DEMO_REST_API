@@ -7,19 +7,21 @@ let isRefreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
 export async function apiClient(endpoint: string, options: RequestInit = {}) {
-  const makeRequest = async (accessToken?: string) => {
+  const { accessToken, refreshToken } = useAuthStore.getState();
+
+  const isFormData = options.body instanceof FormData;
+
+  const makeRequest = async (token?: string) => {
     return fetch(`${BASE_URL}${endpoint}`, {
       ...options,
       headers: {
-        "Content-Type": "application/json",
-        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
       },
       credentials: "include",
     });
   };
-
-  const { accessToken, refreshToken } = useAuthStore.getState();
 
   let res = await makeRequest(accessToken ?? undefined);
 
@@ -38,8 +40,8 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
 
             const refreshData = await refreshRes.json();
 
-            const newAccessToken = refreshData.data.access_token;
-            const newRefreshToken = refreshData.data.refresh_token;
+            const newAccessToken = refreshData?.data?.access_token;
+            const newRefreshToken = refreshData?.data?.refresh_token;
 
             const store = useAuthStore.getState();
 
@@ -67,18 +69,17 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
       }
 
       res = await makeRequest(newToken);
-    } catch (error) {
+    } catch {
       useAuthStore.getState().logout();
       throw new Error("Session expired. Please login again.");
     }
   }
 
-  let data;
+  let data = null;
+
   try {
     data = await res.json();
-  } catch {
-    data = null;
-  }
+  } catch {}
 
   if (!res.ok) {
     throw new Error(data?.message || data?.detail || "Something went wrong");
