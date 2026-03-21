@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
-import { loginUser } from "@/lib/api/auth";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +31,7 @@ import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useLogin } from "@/hooks/use-auth";
 
 export function LoginForm({
   className,
@@ -39,6 +39,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
+  const { mutateAsync: login } = useLogin();
 
   const [showPassword, setShowPassword] = useState(false);
 
@@ -52,12 +53,9 @@ export function LoginForm({
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const res = await loginUser(data);
-
-      setUser(res.data);
+      const res = await login(data);
 
       toast.success("Login successful");
-
       router.push("/dashboard");
     } catch (err: any) {
       let message = "Login failed";

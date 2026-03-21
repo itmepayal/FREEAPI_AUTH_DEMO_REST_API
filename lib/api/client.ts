@@ -3,10 +3,10 @@ import { useAuthStore } from "@/store/auth-store";
 
 const BASE_URL = env.NEXT_PUBLIC_API_URL;
 
-export async function apiClient(endpoint: string, options: RequestInit = {}) {
-  const token = useAuthStore.getState().accessToken;
-  const refreshToken = useAuthStore.getState().refreshToken;
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
 
+export async function apiClient(endpoint: string, options: RequestInit = {}) {
   const makeRequest = async (accessToken?: string) => {
     return fetch(`${BASE_URL}${endpoint}`, {
       ...options,
@@ -15,34 +15,55 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
         ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         ...(options.headers || {}),
       },
-      body: options.body,
       credentials: "include",
     });
   };
 
-  let res = await makeRequest(token ?? undefined);
+  const { accessToken, refreshToken } = useAuthStore.getState();
+
+  let res = await makeRequest(accessToken ?? undefined);
 
   if (res.status === 401 && refreshToken) {
     try {
-      const refreshRes = await fetch(
-        `${BASE_URL}/api/v1/accounts/refresh-token/`,
-        {
+      if (!isRefreshing) {
+        isRefreshing = true;
+
+        refreshPromise = fetch(`${BASE_URL}/api/v1/accounts/refresh-token/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refresh_token: refreshToken }),
-        }
-      );
+        })
+          .then(async (refreshRes) => {
+            if (!refreshRes.ok) throw new Error("Refresh failed");
 
-      if (!refreshRes.ok) throw new Error("Refresh failed");
+            const refreshData = await refreshRes.json();
 
-      const refreshData = await refreshRes.json();
-      const newToken = refreshData.access;
-      const newRefreshToken = refreshData.refresh;
+            const newAccessToken = refreshData.data.access_token;
+            const newRefreshToken = refreshData.data.refresh_token;
 
-      useAuthStore.getState().setAccessToken(newToken);
+            const store = useAuthStore.getState();
 
-      if (newRefreshToken) {
-        useAuthStore.getState().setRefreshToken(newRefreshToken);
+            store.setAccessToken(newAccessToken);
+
+            if (newRefreshToken) {
+              store.setRefreshToken(newRefreshToken);
+            }
+
+            return newAccessToken;
+          })
+          .catch(() => {
+            useAuthStore.getState().logout();
+            return null;
+          })
+          .finally(() => {
+            isRefreshing = false;
+          });
+      }
+
+      const newToken = await refreshPromise;
+
+      if (!newToken) {
+        throw new Error("Session expired. Please login again.");
       }
 
       res = await makeRequest(newToken);
@@ -52,7 +73,12 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
     }
   }
 
-  const data = await res.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
 
   if (!res.ok) {
     throw new Error(data?.message || data?.detail || "Something went wrong");

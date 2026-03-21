@@ -5,16 +5,35 @@ import * as authApi from "@/lib/api/auth";
 import { useAuthStore } from "@/store/auth-store";
 import { useEffect } from "react";
 
+const isProd = process.env.NODE_ENV === "production";
+
+const setCookie = (name: string, value: string) => {
+  document.cookie = `${name}=${value}; path=/; SameSite=Lax; ${
+    isProd ? "Secure;" : ""
+  }`;
+};
+
+const removeCookie = (name: string) => {
+  document.cookie = `${name}=; path=/; max-age=0`;
+};
+
 export const useLogin = () => {
   const setUser = useAuthStore((s) => s.setUser);
-  const setToken = useAuthStore((s) => s.setAccessToken);
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const setRefreshToken = useAuthStore((s) => s.setRefreshToken);
 
   return useMutation({
     mutationFn: authApi.loginUser,
-    onSuccess: (data) => {
-      setToken(data.access);
-      useAuthStore.getState().setRefreshToken(data.refresh);
-      setUser(data.user);
+
+    onSuccess: (res) => {
+      const { access_token, refresh_token, user } = res.data;
+
+      setAccessToken(access_token);
+      setRefreshToken(refresh_token);
+      setUser(user);
+
+      setCookie("accessToken", access_token);
+      setCookie("refreshToken", refresh_token);
     },
   });
 };
@@ -35,8 +54,8 @@ export const useMe = () => {
   });
 
   useEffect(() => {
-    if (query.data) {
-      setUser(query.data);
+    if (query.data?.data) {
+      setUser(query.data.data);
     }
   }, [query.data, setUser]);
 
@@ -48,8 +67,12 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: authApi.logoutUser,
+
     onSuccess: () => {
       logout();
+
+      removeCookie("accessToken");
+      removeCookie("refreshToken");
     },
   });
 };
