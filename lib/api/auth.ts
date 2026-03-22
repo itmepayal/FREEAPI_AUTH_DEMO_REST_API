@@ -103,9 +103,6 @@ export const loginWithGitHub = async () => {
 
 export const loginWithGoogle = async () => {
   const res = await apiClient("/api/v1/accounts/google/");
+  console.log(res);
   window.location.href = res.data.auth_url;
 };
-
-export const getGitHubOAuthUrl = () => apiClient("/api/v1/accounts/github/");
-
-export const getGoogleOAuthUrl = () => apiClient("/api/v1/accounts/google/");
