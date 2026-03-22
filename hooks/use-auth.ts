@@ -144,3 +144,34 @@ export const useUpdateAvatar = () => {
     },
   });
 };
+
+export const useSessions = () => {
+  return useQuery({
+    queryKey: ["sessions"],
+    queryFn: authApi.getSessions,
+  });
+};
+
+export const useRevokeSession = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authApi.revokeSession,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    },
+  });
+};
+
+export const useRevokeOtherSessions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: authApi.revokeOtherSessions,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sessions"] });
+    },
+  });
+};

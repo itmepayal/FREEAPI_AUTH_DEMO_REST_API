@@ -31,6 +31,7 @@ import {
 } from "@/schemas/auth.schema";
 
 export function ChangePasswordDialog({ changePassword }: any) {
+  const [open, setOpen] = useState(false);
   const [show, setShow] = useState({
     old: false,
     new: false,
@@ -55,7 +56,16 @@ export function ChangePasswordDialog({ changePassword }: any) {
       {
         onSuccess: () => {
           toast.success("Password updated successfully");
+
           reset();
+
+          setShow({
+            old: false,
+            new: false,
+            confirm: false,
+          });
+
+          setOpen(false);
         },
         onError: (err: any) => {
           let message = "Failed to update password";
@@ -76,11 +86,15 @@ export function ChangePasswordDialog({ changePassword }: any) {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {/* Trigger */}
       <DialogTrigger asChild>
-        <Button variant="outline">Change Password</Button>
+        <Button variant="outline" onClick={() => setOpen(true)}>
+          Change Password
+        </Button>
       </DialogTrigger>
 
+      {/* Dialog Content */}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>
@@ -92,6 +106,7 @@ export function ChangePasswordDialog({ changePassword }: any) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <FieldGroup>
+            {/* Old Password */}
             <Field>
               <FieldLabel>Old Password</FieldLabel>
               <div className="relative">
@@ -117,6 +132,7 @@ export function ChangePasswordDialog({ changePassword }: any) {
               )}
             </Field>
 
+            {/* New Password */}
             <Field>
               <FieldLabel>New Password</FieldLabel>
               <div className="relative">
@@ -142,6 +158,7 @@ export function ChangePasswordDialog({ changePassword }: any) {
               )}
             </Field>
 
+            {/* Confirm Password */}
             <Field>
               <FieldLabel>Confirm Password</FieldLabel>
               <div className="relative">

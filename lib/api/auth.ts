@@ -83,3 +83,15 @@ export const changeRole = (data: { role: string }) =>
     method: "PATCH",
     body: JSON.stringify(data),
   });
+
+export const getSessions = () => apiClient("/api/v1/accounts/me/sessions/");
+
+export const revokeOtherSessions = () =>
+  apiClient("/api/v1/accounts/me/sessions/revoke-others/", {
+    method: "POST",
+  });
+
+export const revokeSession = (id: string) =>
+  apiClient(`/api/v1/accounts/me/sessions/revoke/${id}/`, {
+    method: "DELETE",
+  });
