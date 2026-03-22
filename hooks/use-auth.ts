@@ -73,6 +73,9 @@ export const useLogout = () => {
 
       removeCookie("accessToken");
       removeCookie("refreshToken");
+
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
     },
   });
 };
