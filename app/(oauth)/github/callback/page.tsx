@@ -26,8 +26,6 @@ export default function GitHubCallback() {
     const username = params.get("username");
 
     if (access && refresh && username) {
-      setAccessToken(access);
-      setRefreshToken(refresh);
       setUser({ username });
 
       setCookie("accessToken", access);
