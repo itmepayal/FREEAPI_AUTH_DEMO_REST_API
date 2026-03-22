@@ -175,3 +175,15 @@ export const useRevokeOtherSessions = () => {
     },
   });
 };
+
+export const useLoginWithGitHub = () => {
+  return useMutation({
+    mutationFn: authApi.loginWithGitHub,
+  });
+};
+
+export const useLoginWithGoogle = () => {
+  return useMutation({
+    mutationFn: authApi.loginWithGoogle,
+  });
+};

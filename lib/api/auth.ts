@@ -95,3 +95,17 @@ export const revokeSession = (id: string) =>
   apiClient(`/api/v1/accounts/me/sessions/revoke/${id}/`, {
     method: "DELETE",
   });
+
+export const loginWithGitHub = async () => {
+  const res = await apiClient("/api/v1/accounts/github/");
+  window.location.href = res.data.auth_url;
+};
+
+export const loginWithGoogle = async () => {
+  const res = await apiClient("/api/v1/accounts/google/");
+  window.location.href = res.data.auth_url;
+};
+
+export const getGitHubOAuthUrl = () => apiClient("/api/v1/accounts/github/");
+
+export const getGoogleOAuthUrl = () => apiClient("/api/v1/accounts/google/");

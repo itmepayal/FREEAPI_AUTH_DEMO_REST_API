@@ -31,7 +31,11 @@ import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useLogin } from "@/hooks/use-auth";
+import {
+  useLogin,
+  useLoginWithGitHub,
+  useLoginWithGoogle,
+} from "@/hooks/use-auth";
 
 export function LoginForm({
   className,
@@ -40,7 +44,8 @@ export function LoginForm({
   const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
   const { mutateAsync: login } = useLogin();
-
+  const githubLogin = useLoginWithGitHub();
+  const googleLogin = useLoginWithGoogle();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -89,12 +94,20 @@ export function LoginForm({
               {/* Social */}
               <Field>
                 <div className="grid grid-cols-2 gap-3">
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => githubLogin.mutate()}
+                  >
                     <Github className="h-4 w-4 mr-2" />
                     GitHub
                   </Button>
 
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => googleLogin.mutate()}
+                  >
                     <FcGoogle className="h-4 w-4 mr-2" />
                     Google
                   </Button>
