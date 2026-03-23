@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { handleFormErrors } from "@/lib/errors/api-error";
 
 export function SignupForm({
   className,
@@ -40,6 +41,8 @@ export function SignupForm({
   const {
     register: formRegister,
     handleSubmit,
+    setError,
+    reset,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -49,27 +52,16 @@ export function SignupForm({
     register(data, {
       onSuccess: () => {
         toast.success("Account created successfully");
+        reset();
         setTimeout(() => {
           router.push("/login");
         }, 1500);
       },
+
       onError: (err: any) => {
-        let message = "Something went wrong. Please try again.";
-
-        if (err?.message) {
-          message = err.message;
-        }
-
-        if (err?.response?.data) {
-          const firstError = Object.values(err.response.data)[0];
-          if (Array.isArray(firstError)) {
-            message = firstError[0];
-          }
-        }
-
-        toast.error("Registration failed", {
-          description: message,
-        });
+        reset();
+        const message = handleFormErrors<RegisterFormValues>(err, setError);
+        toast.error(message);
       },
     });
   };
@@ -92,7 +84,7 @@ export function SignupForm({
                 <FieldLabel>Username</FieldLabel>
                 <Input {...formRegister("username")} />
                 {errors.username && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm capitalize">
                     {errors.username.message}
                   </p>
                 )}
@@ -103,66 +95,63 @@ export function SignupForm({
                 <FieldLabel>Email</FieldLabel>
                 <Input type="email" {...formRegister("email")} />
                 {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                  <p className="text-red-500 text-sm capitalize">
+                    {errors.email.message}
+                  </p>
                 )}
               </Field>
 
-              {/* Passwords */}
-              <div className="grid grid-rows-1 md:grid-rows-2 gap-4">
-                {/* Password */}
-                <Field>
-                  <FieldLabel>Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      className="pr-10"
-                      type={showPassword ? "text" : "password"}
-                      {...formRegister("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                      aria-label="Toggle password visibility"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-red-500 text-sm">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </Field>
+              {/* Password */}
+              <Field>
+                <FieldLabel>Password</FieldLabel>
+                <div className="relative">
+                  <Input
+                    className="pr-10"
+                    type={showPassword ? "text" : "password"}
+                    {...formRegister("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-red-500 text-sm capitalize">
+                    {errors.password.message}
+                  </p>
+                )}
+              </Field>
 
-                {/* Confirm Password */}
-                <Field>
-                  <FieldLabel>Confirm Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      className="pr-10"
-                      type={showConfirmPassword ? "text" : "password"}
-                      {...formRegister("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                      aria-label="Toggle confirm password visibility"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-sm">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
-                </Field>
-              </div>
+              {/* Confirm Password */}
+              <Field>
+                <FieldLabel>Confirm Password</FieldLabel>
+                <div className="relative">
+                  <Input
+                    className="pr-10"
+                    type={showConfirmPassword ? "text" : "password"}
+                    {...formRegister("confirmPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-red-500 text-sm capitalize">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </Field>
 
               <FieldDescription>
                 Must be at least 8 characters long.

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { handleFormErrors } from "@/lib/errors/api-error";
 
 export function ResetPasswordForm({
   className,
@@ -50,6 +51,8 @@ export function ResetPasswordForm({
   const {
     register,
     handleSubmit,
+    setError,
+    reset,
     formState: { errors },
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
@@ -64,23 +67,17 @@ export function ResetPasswordForm({
       {
         onSuccess: () => {
           toast.success("Password reset successful");
-
+          reset();
           setTimeout(() => {
             router.push("/login");
           }, 1500);
         },
         onError: (err: any) => {
-          let message = "Something went wrong";
-
-          if (err?.response?.data) {
-            const firstError = Object.values(err.response.data)[0];
-            if (Array.isArray(firstError)) {
-              message = firstError[0];
-            }
-          } else if (err?.message) {
-            message = err.message;
-          }
-
+          reset();
+          const message = handleFormErrors<ResetPasswordFormValues>(
+            err,
+            setError
+          );
           toast.error(message);
         },
       }
@@ -120,7 +117,7 @@ export function ResetPasswordForm({
                 </div>
 
                 {errors.password && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm capitalize">
                     {errors.password.message}
                   </p>
                 )}
@@ -152,7 +149,7 @@ export function ResetPasswordForm({
                 </div>
 
                 {errors.confirmPassword && (
-                  <p className="text-red-500 text-sm">
+                  <p className="text-red-500 text-sm capitalize">
                     {errors.confirmPassword.message}
                   </p>
                 )}

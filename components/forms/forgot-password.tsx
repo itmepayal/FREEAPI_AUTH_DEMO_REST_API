@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import { handleFormErrors } from "@/lib/errors/api-error";
 
 export function ForgotPasswordForm({
   className,
@@ -42,6 +43,8 @@ export function ForgotPasswordForm({
   const {
     register,
     handleSubmit,
+    setError,
+    reset,
     formState: { errors },
   } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -54,25 +57,19 @@ export function ForgotPasswordForm({
         onSuccess: () => {
           toast.success("Reset link sent to your email");
 
+          reset();
+
           setTimeout(() => {
             router.push("/login");
           }, 1500);
         },
         onError: (err: any) => {
-          let message = "Something went wrong";
-
-          if (err?.response?.data) {
-            const firstError = Object.values(err.response.data)[0];
-            if (Array.isArray(firstError)) {
-              message = firstError[0];
-            }
-          } else if (err?.message) {
-            message = err.message;
-          }
-
-          toast.error("Request failed", {
-            description: message,
-          });
+          reset();
+          const message = handleFormErrors<ForgotPasswordFormValues>(
+            err,
+            setError
+          );
+          toast.error(message);
         },
       }
     );
@@ -101,7 +98,9 @@ export function ForgotPasswordForm({
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                  <p className="text-red-500 text-sm capitalize">
+                    {errors.email.message}
+                  </p>
                 )}
               </Field>
 
@@ -115,7 +114,6 @@ export function ForgotPasswordForm({
                   {isPending ? (
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="animate-spin w-4 h-4" />
-                      <span>Sending link...</span>
                     </div>
                   ) : (
                     "Send Reset Link"

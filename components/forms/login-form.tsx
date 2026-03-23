@@ -41,7 +41,6 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const setUser = useAuthStore((s) => s.setUser);
   const router = useRouter();
   const { mutateAsync: login } = useLogin();
   const githubLogin = useLoginWithGitHub();
@@ -51,6 +50,7 @@ export function LoginForm({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -58,22 +58,13 @@ export function LoginForm({
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const res = await login(data);
-
+      await login(data);
       toast.success("Login successful");
+      reset();
       router.push("/dashboard");
     } catch (err: any) {
-      let message = "Login failed";
-
-      if (err?.response?.data) {
-        const firstError = Object.values(err.response.data)[0];
-        if (Array.isArray(firstError)) {
-          message = firstError[0];
-        }
-      } else if (err?.message) {
-        message = err.message;
-      }
-
+      reset();
+      let message = err.message;
       toast.error(message);
     }
   };
@@ -125,7 +116,9 @@ export function LoginForm({
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-sm text-red-500">{errors.email.message}</p>
+                  <p className="text-sm text-red-500 capitalize">
+                    {errors.email.message}
+                  </p>
                 )}
               </Field>
 
@@ -158,7 +151,7 @@ export function LoginForm({
                 </div>
 
                 {errors.password && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-red-50 capitalize0">
                     {errors.password.message}
                   </p>
                 )}

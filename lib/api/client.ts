@@ -82,7 +82,11 @@ export async function apiClient(endpoint: string, options: RequestInit = {}) {
   } catch {}
 
   if (!res.ok) {
-    throw new Error(data?.message || data?.detail || "Something went wrong");
+    throw {
+      status: res.status,
+      data: data,
+      message: data?.message || data?.detail || "Something went wrong",
+    };
   }
 
   return data;

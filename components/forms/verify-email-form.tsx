@@ -48,19 +48,10 @@ export function VerifyEmailForm({
         },
         onError: (err: any) => {
           let message = "Verification failed";
-
-          if (err?.response?.data) {
-            const firstError = Object.values(err.response.data)[0];
-            if (Array.isArray(firstError)) {
-              message = firstError[0];
-            }
-          } else if (err?.message) {
+          if (err.message) {
             message = err.message;
           }
-
-          toast.error("Verification failed", {
-            description: message,
-          });
+          toast.error(message);
         },
       }
     );

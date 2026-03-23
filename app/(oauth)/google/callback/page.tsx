@@ -42,7 +42,7 @@ export default function GoogleCallback() {
   }, [router, setAccessToken, setRefreshToken, setUser]);
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen w-full">
       <Loader2 className="animate-spin" />
     </div>
   );
